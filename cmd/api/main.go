@@ -9,21 +9,24 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/DEV-BC/backend_chatapp/internal/config"
 )
 
 func main() {
+	cfg := config.LoadConfig()
 	mux := http.NewServeMux()
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    cfg.Address,
 		Handler: mux,
 	}
 
-	log.Println("Server is running")
 	shutdownCh := make(chan os.Signal, 1)
 	signal.Notify(shutdownCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	//run server in its own goroutine outside of main function
 	go func() {
+		log.Printf("Server is running on https://%s\n", cfg.HTTPServer.Address)
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Failed to start server: %v", err)
