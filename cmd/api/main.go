@@ -12,6 +12,7 @@ import (
 
 	"github.com/DEV-BC/backend_chatapp/internal/config"
 	"github.com/DEV-BC/backend_chatapp/internal/db"
+	"github.com/DEV-BC/backend_chatapp/internal/routes"
 )
 
 func main() {
@@ -19,8 +20,10 @@ func main() {
 
 	db.InitDB(cfg.DBPath, cfg.DBName)
 	defer db.CloseDB()
-	
+
 	mux := http.NewServeMux()
+
+	routes.RegisterRoutes(mux)
 
 	server := &http.Server{
 		Addr:    cfg.Address,
@@ -31,7 +34,8 @@ func main() {
 	signal.Notify(shutdownCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	//run server in its own goroutine outside of main function
 	go func() {
-		log.Printf("Server is running on https://%s\n", cfg.HTTPServer.Address)
+		log.Printf("Server is running on http://%s", cfg.HTTPServer.Address)
+		log.Printf("Health Check HTTP: http://%s/api/health-check-http", cfg.HTTPServer.Address)
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Failed to start server: %v", err)
