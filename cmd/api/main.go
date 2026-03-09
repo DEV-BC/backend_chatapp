@@ -11,10 +11,15 @@ import (
 	"time"
 
 	"github.com/DEV-BC/backend_chatapp/internal/config"
+	"github.com/DEV-BC/backend_chatapp/internal/db"
 )
 
 func main() {
 	cfg := config.LoadConfig()
+
+	db.InitDB(cfg.DBPath, cfg.DBName)
+	defer db.CloseDB()
+	
 	mux := http.NewServeMux()
 
 	server := &http.Server{

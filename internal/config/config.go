@@ -34,7 +34,7 @@ func LoadConfig() *Config {
 
 	//if its not on cloud hosting site, hardcode it to file in project
 	if envPath == "" {
-		envPath = "./config/env"
+		envPath = "./config/dev.env"
 	}
 
 	err := cleanenv.ReadConfig(envPath, &cfg)
