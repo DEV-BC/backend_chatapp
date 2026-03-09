@@ -12,6 +12,7 @@ import (
 
 	"github.com/DEV-BC/backend_chatapp/internal/config"
 	"github.com/DEV-BC/backend_chatapp/internal/db"
+	"github.com/DEV-BC/backend_chatapp/internal/middlewares"
 	"github.com/DEV-BC/backend_chatapp/internal/routes"
 )
 
@@ -21,13 +22,13 @@ func main() {
 	db.InitDB(cfg.DBPath, cfg.DBName)
 	defer db.CloseDB()
 
-	mux := http.NewServeMux()
-
-	routes.RegisterRoutes(mux)
+	mux := routes.RegisterRoutes()
+	loggerMux := middlewares.LoggingMiddleware(mux)
+	corsMux := middlewares.CorsMiddle(loggerMux)
 
 	server := &http.Server{
 		Addr:    cfg.Address,
-		Handler: mux,
+		Handler: corsMux,
 	}
 
 	shutdownCh := make(chan os.Signal, 1)
