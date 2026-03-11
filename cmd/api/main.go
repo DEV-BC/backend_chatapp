@@ -14,10 +14,12 @@ import (
 	"github.com/DEV-BC/backend_chatapp/internal/db"
 	"github.com/DEV-BC/backend_chatapp/internal/middlewares"
 	"github.com/DEV-BC/backend_chatapp/internal/routes"
+	"github.com/DEV-BC/backend_chatapp/internal/utils"
 )
 
 func main() {
 	cfg := config.LoadConfig()
+	utils.InitJWT(cfg.JWTKey)
 
 	db.InitDB(cfg.DBPath, cfg.DBName)
 	defer db.CloseDB()
@@ -37,6 +39,9 @@ func main() {
 	go func() {
 		log.Printf("Server is running on http://%s", cfg.HTTPServer.Address)
 		log.Printf("Health Check HTTP: http://%s/api/health-check-http", cfg.HTTPServer.Address)
+
+		//Authentication
+		log.Printf("Email register, POST: http://%s/api/auth/register-email", cfg.HTTPServer.Address)
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Failed to start server: %v", err)

@@ -1,21 +1,23 @@
 package models
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/DEV-BC/backend_chatapp/internal/db"
 )
 
 type User struct {
-	ID                   int64     `json:"id"`
-	Name                 string    `json:"name"`
-	Email                string    `json:"email"`
-	Password             string    `json:"-"`
-	RefreshTokenWeb      string    `json:"-"`
-	RefreshTokenWebAt    time.Time `json:"-"`
-	RefreshTokenMobile   string    `json:"-"`
-	RefreshTokenMobileAt time.Time `json:"-"`
-	CreatedAt            time.Time `json:"created_at"`
+	ID                   int64      `json:"id"`
+	Name                 string     `json:"name"`
+	Email                string     `json:"email"`
+	Password             string     `json:"-"`
+	RefreshTokenWeb      *string    `json:"-"`
+	RefreshTokenWebAt    *time.Time `json:"-"`
+	RefreshTokenMobile   *string    `json:"-"`
+	RefreshTokenMobileAt *time.Time `json:"-"`
+	CreatedAt            time.Time  `json:"created_at"`
 }
 
 func GetUserByEmail(email string) (*User, error) {
@@ -26,6 +28,9 @@ func GetUserByEmail(email string) (*User, error) {
 					WHERE email = ?`, email,
 	)
 	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.RefreshTokenWeb, &u.RefreshTokenWebAt, &u.RefreshTokenMobile, &u.RefreshTokenMobileAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
